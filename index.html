@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Gallery</title>
+<style>
+  body { margin: 0; background: #090612; color: #fff; font-family: sans-serif; padding: 15px; }
+  header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #2d1b4e; }
+  .logo { font-weight: 900; font-size: 1.2rem; color: #ec4899; }
+  .btn-add { background: linear-gradient(90deg, #8b5cf6, #ec4899); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: bold; }
+  h1 { text-align: center; font-size: 1.8rem; margin: 25px 0 15px; }
+  h1 span { color: #ec4899; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; }
+  .tab { background: #140e26; border: 1px solid #8b5cf6; color: #fff; padding: 6px 12px; border-radius: 12px; font-size: 0.85rem; }
+  .tab.active { background: #ec4899; border-color: #ec4899; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .card { background: #140e26; border: 1px solid #2d1b4e; border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 4/5; }
+  .card img, .card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tag { position: absolute; bottom: 8px; left: 8px; background: rgba(9,6,18,0.85); color: #ec4899; padding: 3px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 99; justify-content: center; align-items: center; }
+  .modal.open { display: flex; }
+  .modal img, .modal video { max-width: 95vw; max-height: 85vh; border: 2px solid #8b5cf6; border-radius: 10px; }
+  .close { position: fixed; top: 15px; right: 20px; font-size: 2rem; color: #ec4899; font-weight: bold; z-index: 100; }
+  .box { display: none; position: fixed; inset: 0; background: rgba(9,6,18,0.95); z-index: 90; justify-content: center; align-items: center; padding: 20px; }
+  .box.open { display: flex; }
+  .box-inner { background: #140e26; border: 1px solid #8b5cf6; padding: 20px; border-radius: 16px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 12px; }
+  select, input, .go { padding: 10px; border-radius: 10px; border: 1px solid #8b5cf6; background: #090612; color: #fff; }
+  .go { background: #ec4899; border: none; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SYNTH // AI</div>
+  <button class="btn-add" onclick="document.getElementById('upBox').classList.add('open')">+ Загрузить</button>
+</header>
+
+<h1>Мои <span>AI</span> работы</h1>
+
+<div class="tabs" id="tabs">
+  <button class="tab active" data-m="all">Все</button>
+  <button class="tab" data-m="Illustrious">Illustrious</button>
+  <button class="tab" data-m="MiniMax H3">MiniMax H3</button>
+  <button class="tab" data-m="LTX-2.5">LTX-2.5</button>
+  <button class="tab" data-m="Krea2">Krea2</button>
+  <button class="tab" data-m="Anima">Anima</button>
+  <button class="tab" data-m="z-image">z-image</button>
+</div>
+
+<div class="grid" id="grid">
+  <div class="card" data-m="Illustrious"><img src="1.png" onerror="this.src='1.jpg';this.onerror=null;"><span class="tag">Illustrious</span></div>
+  <div class="card" data-m="MiniMax H3"><video src="video1.mp4" autoplay loop muted playsinline></video><span class="tag">MiniMax H3</span></div>
+  <div class="card" data-m="Illustrious"><img src="2.png" onerror="this.src='2.jpg';this.onerror=null;"><span class="tag">Illustrious</span></div>
+  <div class="card" data-m="LTX-2.5"><video src="video2.mp4" autoplay loop muted playsinline></video><span class="tag">LTX-2.5</span></div>
+  <div class="card" data-m="Illustrious"><img src="3.png" onerror="this.src='3.jpg';this.onerror=null;"><span class="tag">Illustrious</span></div>
+</div>
+
+<div class="box" id="upBox">
+  <div class="box-inner">
+    <b>Добавить с телефона</b>
+    <select id="selM">
+      <option>Illustrious</option><option>MiniMax H3</option><option>LTX-2.5</option>
+      <option>Krea2</option><option>Anima</option><option>z-image</option>
+    </select>
+    <input type="file" id="inpF" accept="image/*,video/*" multiple>
+    <button class="go" onclick="addFiles()">Добавить в сетку</button>
+    <button onclick="document.getElementById('upBox').classList.remove('open')" style="background:none;border:none;color:#aaa;">Закрыть</button>
+  </div>
+</div>
+
+<div class="modal" id="mod" onclick="this.classList.remove('open');this.innerHTML='<span class=close>&times;</span>'">
+  <span class="close">&times;</span>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      let m = t.dataset.m;
+      document.querySelectorAll('.card').forEach(c => {
+        c.style.display = (m === 'all' || c.dataset.m === m) ? 'block' : 'none';
+      });
+    };
+  });
+
+  document.getElementById('grid').onclick = e => {
+    let c = e.target.closest('.card');
+    if (!c) return;
+    let mod = document.getElementById('mod');
+    let img = c.querySelector('img'), vid = c.querySelector('video');
+    mod.innerHTML = '<span class="close">&times;</span>';
+    if (img) mod.innerHTML += `<img src="${img.src}">`;
+    if (vid) mod.innerHTML += `<video src="${vid.src}" controls autoplay loop playsinline></video>`;
+    mod.classList.add('open');
+  };
+
+  function addFiles() {
+    let files = document.getElementById('inpF').files;
+    let m = document.getElementById('selM').value;
+    for (let f of files) {
+      let u = URL.createObjectURL(f);
+      let isV = f.type.startsWith('video');
+      let d = document.createElement('div');
+      d.className = 'card'; d.dataset.m = m;
+      d.innerHTML = (isV ? `<video src="${u}" autoplay loop muted playsinline></video>` : `<img src="${u}">`) + `<span class="tag">${m}</span>`;
+      document.getElementById('grid').prepend(d);
+    }
+    document.getElementById('upBox').classList.remove('open');
+  }
+</script>
+</body>
+</html>
